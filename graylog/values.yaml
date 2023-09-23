@@ -1,0 +1,59 @@
+tags:
+  install-mongodb: false
+  install-opensearch: false
+
+graylog:
+
+  mongodb:
+    uri: "mongodb://graylog:graylog@mongodb-0.mongodb-headless.monitoring.svc.cluster.local:27017/graylog?authSource=graylog"
+  
+  opensearch:
+    hosts: "http://elasticsearch-master.monitoring.svc.cluster.local:9200"
+    version: "7.10.2"
+
+  ## A service for Graylog web interface
+  ##
+  service:
+    type: NodePort
+    port: 9000
+    nodePort: 30036
+    ## Add additional ports for the service/statefulset to expose
+    ##
+    ports: []
+
+    headless:
+      ## Add suffix to headless service name
+      ##
+      suffix: ""
+
+    master:
+      ## Enable Graylog master service
+      ##
+      enabled: true
+      ## Graylog master service Ingress annotations
+      ##
+      annotations: {}
+      ## Graylog master service port.
+      ##
+      port: 9000
+      ## Graylog master service type.
+      ##
+      type: ClusterIP
+
+  input:
+    tcp:
+      service:
+        name: graylog-tcp
+        type: LoadBalancer
+        loadBalancerIP:
+      ports:
+        - name: gelf
+          port: 12222
+    udp:
+      service:
+        name: graylog-udp
+        type: ClusterIP
+      ports:
+        - name: syslog
+          port: 12222
+  

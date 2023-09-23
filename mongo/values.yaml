@@ -1,0 +1,13 @@
+architecture: replicaset
+auth:
+  rootPassword: "admin"
+  usernames: 
+    - "graylog"
+  passwords: 
+    - "graylog"
+  databases: 
+    - "graylog"
+  replicaSetKey: graylog
+persistence:
+  enabled: false
+replicaCount: 1

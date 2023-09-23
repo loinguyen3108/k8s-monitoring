@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+#   mongo:
+#     image: mongo:7.0.1
+#     container_name: mongo
+#     restart: always
+#     ports:
+#       - 27017:27017
+#     environment:
+#       - MONGO_INITDB_ROOT_USERNAME=root
+#       - MONGO_INITDB_ROOT_PASSWORD=example
+#     networks:
+#       - graylog
+
+#   mongo-express:
+#     image: mongo-express
+#     container_name: mongo-express
+#     restart: always
+#     ports:
+#       - 8081:8081
+#     environment:
+#       ME_CONFIG_MONGODB_ADMINUSERNAME: root
+#       ME_CONFIG_MONGODB_ADMINPASSWORD: example
+#       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+#     networks:
+#       - graylog
+  
+#   elasticsearch:
+#     image: elasticsearch:7.17.13
+#     container_name: elasticsearch
+#     restart: always
+#     ports:
+#       - 9200:9200
+#     networks:
+#       - graylog
+#     environment:
+#         - http.host=0.0.0.0
+#         - transport.host=localhost
+#         - network.host=0.0.0.0
+#         - "ES_JAVA_OPTS=-Dlog4j2.formatMsgNoLookups=true -Xms512m -Xmx512m"
+#         - xpack.security.enabled=false
+#         # - discovery.type=single-node
+#     ulimits:
+#       memlock:
+#         soft: -1
+#         hard: -1
+
+  kibana:
+    image: kibana:7.10.1
+    container_name: kibana
+    restart: always
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://192.168.49.2,192.168.49.3,192.168.49.4:9200
+    # depends_on:
+    #   - elasticsearch
+    # networks:
+    #   - graylog
+
+#   graylog:
+#     image: graylog/graylog:5.1
+#     container_name: graylog
+#     restart: always
+#     environment:
+#       - GRAYLOG_PASSWORD_SECRET=useradmingraylog
+#       - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+#       - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:9000/
+#       - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#       - GRAYLOG_MONGODB_URI=mongodb://root:example@mongo:27017/graylog
+#     entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
+#     depends_on:
+#       - mongo
+#       - elasticsearch
+#     ports:
+#       - 9000:9000
+#       - 1514:1514
+#       - 1514:1514/udp
+#       - 12201:12201
+#       - 12201:12201/udp
+#     networks:
+#       - graylog
+
+# networks:
+#     graylog:
+#       driver: bridge
+

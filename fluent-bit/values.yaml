@@ -1,0 +1,83 @@
+## https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file
+config:
+  service: |
+    [SERVICE]
+        Daemon       Off
+        Flush        {{ .Values.flush }}
+        Log_Level    {{ .Values.logLevel }}
+        Parsers_File /fluent-bit/etc/parsers.conf
+        Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
+        HTTP_Server  On
+        HTTP_Listen  0.0.0.0
+        HTTP_Port    {{ .Values.metricsPort }}
+        Health_Check On
+
+  ## https://docs.fluentbit.io/manual/pipeline/inputs
+  inputs: |
+    [INPUT]
+        Name             tail
+        Path             /var/log/containers/*.log
+        Parser           docker
+        DB               /var/log/flb_kube.db
+        Tag              kube.*
+        Mem_Buf_Limit    5MB
+        Skip_Long_Lines  On
+        Refresh_Interval 10
+
+  ## https://docs.fluentbit.io/manual/pipeline/filters
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        Annotations On
+        Labels On
+
+    [FILTER]
+        Name nest
+        Match *
+        Operation lift
+        Nested_under kubernetes
+
+  ## https://docs.fluentbit.io/manual/pipeline/outputs
+  outputs: |
+    [OUTPUT]
+        Name               es
+        Match              kube.*
+        Host               elasticsearch-master
+        Port               9200
+        HTTP_User          elastic
+        HTTP_Passwd        admin
+        Logstash_Format    On
+        Retry_Limit        False
+        Index              fluent-bit
+        Retry_Limit        False
+        Trace_Error        On    
+        Suppress_Type_Name On
+        Replace_Dots       On
+    
+    [OUTPUT]
+        Name                    gelf
+        Match                   kube.*
+        Host                    graylog-udp
+        Port                    12222
+        Mode                    udp
+        Gelf_Host_Key           stream
+        Gelf_Short_Message_Key  log
+
+
+    
+
+  ## https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/upstream-servers
+  ## This configuration is deprecated, please use `extraFiles` instead.
+  upstream: {}
+
+  ## https://docs.fluentbit.io/manual/pipeline/parsers
+  customParsers: |
+    [PARSER]
+        Name        docker_no_time
+        Format      json
+        Time_Keep   Off
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
